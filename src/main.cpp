@@ -52,12 +52,42 @@ int main(int argc, char* argv[]){
     Uint64 lastTime = SDL_GetPerformanceCounter();
 
     while(running){
+
+        // 현재 시각 가져오기
+        Uint64 currentTime = SDL_GetPerformanceCounter();
+
+        // 이전 프레임과의 시간 차이를 초 단위로 계산
+        // SDL_GetPerformanceCounter(): 아주 정밀한 시간 카운터 값을 가져옴
+        // SDL_GetPerformanceFrequency(): 그 카운터가 1초에 몇 번 증가하는지 알려주는 값
+        // 두 값을 나누면 이전 프레임에서 지금까지 몇 초 지났는지가 나옴 (보통 0.016초 정도, 60fps 기준)
+        float deltaTime = (currentTime - lastTime) / (float)SDL_GetPerformanceFrequency();
+        lastTime = currentTime;
+
         // 큐에 쌓인 모든 이벤트(키보드, 창 닫기) 처리
         while(SDL_PollEvent(&event)){
             if(event.type == SDL_QUIT){
                 running = false; // 창닫기 버튼을 누르면 종료
             }
         }
+        
+        // 현재 눌려있는 모든 키 상태를 배열로 가져옴
+        const Uint8* keystate = SDL_GetKeyboardState(nullptr);
+
+        // 이동 방향 
+        float dx = 0.0f;
+        float dy = 0.0f;
+
+        if(keystate[SDL_SCANCODE_W]) dy -= 1.0f; 
+        if(keystate[SDL_SCANCODE_S]) dy += 1.0f; 
+        if(keystate[SDL_SCANCODE_A]) dx -= 1.0f; 
+        if(keystate[SDL_SCANCODE_D]) dx += 1.0f; 
+
+        // 이동 속도
+        float speed = 300.0f;
+
+        // 실제 위치 갱신 
+        player.x += (int)(dx * speed * deltaTime);
+        player.y += (int)(dy * speed * deltaTime);
 
           // 배경색 지정 
         SDL_SetRenderDrawColor(renderer, 20, 20, 30, 255);
