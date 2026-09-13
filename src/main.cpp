@@ -97,6 +97,9 @@ int main(int argc, char* argv[]){
         float deltaTime = (currentTime - lastTime) / (float)SDL_GetPerformanceFrequency();
         lastTime = currentTime;
 
+        // 델타타임이 비정상적으로 크게 튀는 걸 방지
+        if(deltaTime > 0.01f) deltaTime = 0.01f;
+
         // 큐에 쌓인 모든 이벤트(키보드, 창 닫기) 처리
         while(SDL_PollEvent(&event)){
             if(event.type == SDL_QUIT){
@@ -127,7 +130,7 @@ int main(int argc, char* argv[]){
         if(player.x < 0) player.x = 0;
         if(player.y < 0) player.y = 0;
         if(player.x > WINDOW_WIDTH - player.w) player.x = WINDOW_WIDTH - player.w;
-        if(player.y > WINDOW_HEIGHT - player.y) player.y = WINDOW_HEIGHT - player.h;
+        if(player.y > WINDOW_HEIGHT - player.h) player.y = WINDOW_HEIGHT - player.h;
 
         // 배경 지우기
         SDL_RenderClear(renderer);
