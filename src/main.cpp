@@ -9,6 +9,11 @@
 const int WINDOW_WIDTH = 1280;
 const int WINDOW_HEIGHT = 720; 
 
+// 플레이어 크기 
+const int PLAYER_WIDTH = 60;
+const int PLAYER_HEIGHT = 60; 
+
+
 int main(int argc, char* argv[]){
     // SDL 초기화 : 비디오 기능만 사용
     if(SDL_Init(SDL_INIT_VIDEO) < 0){
@@ -58,13 +63,27 @@ int main(int argc, char* argv[]){
 
     // 플레이어 표현(x, y, 너비, 높이)
     SDL_Rect player;
-    player.x = 1280/ 2 - 16;
-    player.y = 720/ 2 - 16;
-    player.w = 32;
-    player.h = 32;
+    player.x = WINDOW_WIDTH/ 2 - PLAYER_WIDTH/2;
+    player.y = WINDOW_HEIGHT/ 2 - PLAYER_HEIGHT/2;
+    player.w = PLAYER_WIDTH;
+    player.h = PLAYER_HEIGHT;
 
     // 이전 프레임 시각 기록 (델타타임 계산)
     Uint64 lastTime = SDL_GetPerformanceCounter();
+
+    // 배경 이미지 불러오기 
+    SDL_Texture* backgroundTexture = IMG_LoadTexture(renderer, "assets/background.png");
+    if(!backgroundTexture){
+        std::cerr << "배경 이미지 로드 실패" << IMG_GetError();
+        return 1; 
+    }
+
+    // 플레이어 이미지 불러오기
+    SDL_Texture* playerTexture = IMG_LoadTexture(renderer, "assets/player1_idle.png");
+    if(!playerTexture){
+        std::cerr << "플레이어 이미지 로드 실패" << IMG_GetError();
+        return 1; 
+    }
 
     while(running){
 
@@ -110,25 +129,33 @@ int main(int argc, char* argv[]){
         if(player.x > WINDOW_WIDTH - player.w) player.x = WINDOW_WIDTH - player.w;
         if(player.y > WINDOW_HEIGHT - player.y) player.y = WINDOW_HEIGHT - player.h;
 
-          // 배경색 지정 
-        SDL_SetRenderDrawColor(renderer, 20, 20, 30, 255);
-
-        // 랜더러를 위에서 지정한 색으로 지움
+        // 배경 지우기
         SDL_RenderClear(renderer);
+        
+        // SDL_RenderCopy(renderer, texture, srcRect, dstRect): 텍스처를 화면에 그리는 함수
+        // srcRect가 nullptr이면 이미지 전체를 사용
+        // dstRect는 화면에서 어디에, 얼마 크기로 그릴지 지정
 
-        // 플레이어 색상 지정
-        SDL_SetRenderDrawColor(renderer, 100, 200, 255, 255);
+        SDL_Rect backgroundRect = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
+        SDL_RenderCopy(renderer, backgroundTexture, nullptr, &backgroundRect);
 
-        // 지정한 샋으로 player 그리기
-        SDL_RenderFillRect(renderer, &player);
+        // 플레이어 이미지를 player 위치/크기에 맞게 그리기
+        SDL_RenderCopy(renderer, playerTexture, nullptr, &player);
 
         // 지금까지 그린 내용을 실제 화면에 표시
         SDL_RenderPresent(renderer);
     }
 
-     // 사용한 리소스들을 역순으로 정리
+    // 텍스쳐 리소스 정리
+    SDL_DestroyTexture(playerTexture);
+    SDL_DestroyTexture(backgroundTexture);
+
+
+    // 사용한 리소스들을 역순으로 정리
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+
+    IMG_Quit();
     SDL_Quit();
   
     return 0;
