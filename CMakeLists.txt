@@ -13,17 +13,20 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(PkgConfig REQUIRED)
 
 # pkg-config로 SDL2 찾기
-Pkg_check_modules(SDL2 REQUIRED sdl2)
+pkg_check_modules(SDL2 REQUIRED sdl2)
+
+# SDL2 image 라이브러리 찾기 
+pkg_check_modules(SDL2_IMAGE REQUIRED sdl2_image)
 
 # 실행 파일 생성
 add_executable(bong src/main.cpp)
 
-# 실행 파일이 SDL2 헤더파일을 찾을 수 있게 경로 추가
-target_include_directories(bong PRIVATE ${SDL2_INCLUDE_DIRS})
+# 실행 파일이 SDL2 헤더파일, SDL2 이미지 을 찾을 수 있게 경로 추가
+target_include_directories(bong PRIVATE ${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS})
 
-# 실행 파일에 SDL2 연결
-target_link_libraries(bong PRIVATE ${SDL2_LIBRARIES})
+# 실행 파일에 SDL2, SDL2 이미지 연결
+target_link_libraries(bong PRIVATE ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})
 
 # SDL2가 요구하는 추가 컴파일 옵션 적용
-target_compile_options(bong PRIVATE ${SDL2_CFLAGS_OTHER})
+target_compile_options(bong PRIVATE ${SDL2_CFLAGS_OTHER} ${SDL2_IMAGE_CFLAGS_OTHER})
 

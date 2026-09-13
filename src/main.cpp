@@ -1,5 +1,13 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include <iostream>
+
+
+// 전역 관리
+
+// 창 크기 상수
+const int WINDOW_WIDTH = 1280;
+const int WINDOW_HEIGHT = 720; 
 
 int main(int argc, char* argv[]){
     // SDL 초기화 : 비디오 기능만 사용
@@ -8,13 +16,20 @@ int main(int argc, char* argv[]){
         return 1;
     }
 
+    // SDL_Image 초기화 : PNG 로딩 기능 활성화
+    if(!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
+        std::cerr << "SDL_image 초기화 실패" << IMG_GetError() << std::endl;
+        SDL_Quit();
+        return 1; 
+    }
+
     // 창 생성 : 제목, 위치, 너비, 높이 옵션
     // SDL_WINDOWPOS_CENTERED: 화면 정중앙에 창 띄움
     // 1280, 720: 창 크기 
     // SDL_WINDOW_SHOWN: 창을 즉시 보이게 함
     SDL_Window* window = SDL_CreateWindow(
         "bong", 
-        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_SHOWN
+        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN
     );
 
     if(!window){
@@ -88,6 +103,12 @@ int main(int argc, char* argv[]){
         // 실제 위치 갱신 
         player.x += (int)(dx * speed * deltaTime);
         player.y += (int)(dy * speed * deltaTime);
+
+        // 화면 경계 안으로 위치 제한 (clamp)
+        if(player.x < 0) player.x = 0;
+        if(player.y < 0) player.y = 0;
+        if(player.x > WINDOW_WIDTH - player.w) player.x = WINDOW_WIDTH - player.w;
+        if(player.y > WINDOW_HEIGHT - player.y) player.y = WINDOW_HEIGHT - player.h;
 
           // 배경색 지정 
         SDL_SetRenderDrawColor(renderer, 20, 20, 30, 255);
