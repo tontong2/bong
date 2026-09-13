@@ -64,8 +64,15 @@ int main(int argc, char* argv[]){
     bool running = true;
     SDL_Event event;
 
+    // 플레이어 체력 설정
     int playerMaxHP = PLAYER_BASE_MAX_HP; // 최대 체력
     int playerCurrentHP = playerMaxHP; // 현재 체력
+
+    // 체력바 설정
+    const int HP_BAR_X = 20; 
+    const int HP_BAR_Y = 20;
+    const int HP_BAR_WIDTH = 200; 
+    const int HP_BAR_HEIGHT = 24; 
 
     // 플레이어 표현(x, y, 너비, 높이)
     SDL_Rect player;
@@ -212,10 +219,31 @@ int main(int argc, char* argv[]){
             flip // 좌우반전 여부 
         );
 
+        // ------ 체력바 -------- //
+        // 현재 체력 비율 계산 (0.0 ~ 1.0)
+        float hpRatio = (float)playerCurrentHP / (float)playerMaxHP; 
+        if(hpRatio < 0.0f) hpRatio = 0.0f;
+        if(hpRatio < 1.0f) hpRatio = 1.0f;
+
+        // 배경(빈 체력바) 
+        SDL_Rect hpBarBackground = { HP_BAR_X, HP_BAR_Y, HP_BAR_WIDTH, HP_BAR_HEIGHT };
+        SDL_SetRenderDrawColor(renderer, 60, 60, 60, 255);
+        SDL_RenderFillRect(renderer, &hpBarBackground);
+
+        // 실제 체력만큼 채워지는 바 
+        SDL_Rect hpBarFill = { HP_BAR_X, HP_BAR_Y, (int)(HP_BAR_WIDTH * hpRatio), HP_BAR_HEIGHT };
+        SDL_SetRenderDrawColor(renderer, 220, 50, 50, 255);
+        SDL_RenderFillRect(renderer, &hpBarFill);
+
+        // 테두리 - 흰색 
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_RenderDrawRect(renderer, &hpBarBackground);
+
         // 지금까지 그린 내용을 실제 화면에 표시
         SDL_RenderPresent(renderer);
-    }
 
+    }
+    
     // 텍스쳐 리소스 정리
     SDL_DestroyTexture(playerTexture);
     SDL_DestroyTexture(backgroundTexture);
@@ -223,7 +251,6 @@ int main(int argc, char* argv[]){
     for(int i=0; i<WALK_FRAME_COUNT; i++){
         SDL_DestroyTexture(walkTextures[i]);
     }
-
 
     // 사용한 리소스들을 역순으로 정리
     SDL_DestroyRenderer(renderer);
